@@ -1,0 +1,61 @@
+version: '3.5'
+
+services:
+  javajan-docker-web:
+    container_name: javajan-docker-web
+    build:
+      context: ./docker/nginx
+      args:
+        UID: $U_ID
+    ports:
+      - 7000:80
+    volumes:
+      - ./public:/appdata/www/public
+    depends_on:
+      - javajan-docker-be
+    networks:
+      - javajan-docker-net
+
+  javajan-docker-be:
+    container_name: javajan-docker-be
+    build:
+      context: docker/php
+      args:
+        UID: $U_ID
+    volumes:
+      - ./:/appdata/www
+    ###> XDEBUG 3 ###
+    # Use your client IP here
+    # Linux: run "ip a | grep docker0"
+    # Windows (with WSL2): Run "grep nameserver /etc/resolv.conf  | cut -d ' ' -f2"
+    # MacOS: host.docker.internal
+    environment:
+      XDEBUG_CLIENT_HOST: 172.17.0.1
+      XDEBUG_CLIENT_PORT: 9003
+      PHP_IDE_CONFIG: serverName=javajan-docker-server
+    networks:
+      - javajan-docker-net
+
+  javajan-docker-db:
+    container_name: javajan-docker-db
+    build:
+      context: ./docker/database
+    ports:
+      - 60000:3306
+    environment:
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+    volumes:
+      - javajan-docker-db-data:/var/lib/mysql
+    networks:
+      - javajan-docker-net
+
+volumes:
+  javajan-docker-db-data:
+
+networks:
+  javajan-docker-net:
+    external: true
