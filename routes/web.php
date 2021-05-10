@@ -19,6 +19,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
     Route::resource('products', ProductController::class)->except('destroy');
     Route::delete('products/delete', [ProductController::class, 'destroy'])->name('products.destroy');
-    Route::resource('categories', CategoryController::class);
+    Route::resource('categories', CategoryController::class)->except('show');
 });
 

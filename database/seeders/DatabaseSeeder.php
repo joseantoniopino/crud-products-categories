@@ -35,6 +35,6 @@ class DatabaseSeeder extends Seeder
             'description' => 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.',
         ]);
 
-        Product::factory(2)->create();
+        Product::factory(50)->create();
     }
 }
