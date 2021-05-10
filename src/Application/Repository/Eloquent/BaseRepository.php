@@ -19,7 +19,7 @@ class BaseRepository implements EloquentRepositoryInterface
     public function all(array $columns = ['*'], array $relations = []): JsonResponse
     {
         return datatables()
-            ->eloquent($this->model::query())
+            ->eloquent($this->model::query()->orderBy('updated_at', 'desc'))
             ->addColumn('btn', 'partials.actions')
             ->rawColumns(['btn'])
             ->toJson();

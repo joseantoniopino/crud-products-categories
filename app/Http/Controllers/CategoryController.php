@@ -2,84 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveCategoryRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Src\Application\Repository\Eloquent\CategoryRepository;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    public function __construct(protected CategoryRepository $repository){}
+
+    public function index(): view
     {
-        //
+        $categories = Category::with('products')->get();
+        return view('categories.index')->with('categories', $categories);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+
+    public function create(): View
     {
-        //
+        return view('categories.create')->with([
+            'category' => new Category()
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+
+    public function store(SaveCategoryRequest $request): RedirectResponse
     {
-        //
+        $fields = $request->validated();
+
+        $category = new Category($fields);
+        $this->repository->create($category->toArray());
+
+        return redirect()->route('categories.index')->with('status', 'Category created!');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Category $category)
+
+    public function edit(Category $category): View
     {
-        //
+        return view('categories.edit')->with([
+            'category' => $category,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Category $category)
+
+    public function update(SaveCategoryRequest $request, Category $category): RedirectResponse
     {
-        //
+        $category->fill($request->validated());
+
+        $this->repository->update($category->id, $category->toArray());
+
+        return redirect()->route('categories.index')->with('status', 'Category updated!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Category $category)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Category $category)
+    public function destroy(Category $category): RedirectResponse
     {
-        //
+        $category->delete();
+        return redirect()->route('categories.index')->with('status', 'Category deleted!');
     }
 }
