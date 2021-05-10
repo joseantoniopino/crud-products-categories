@@ -18,10 +18,9 @@ class CreateProductsTable extends Migration
             $table->uuid('category_id')->nullable();
             $table->string('name', 150);
             $table->text('description');
-            $table->string('slug', 255);
             $table->string('image', 255)->nullable();
             $table->float('price');
-            $table->boolean('with_stock')->default(true);
+            $table->boolean('with_stock')->default(false);
             $table->timestamps();
 
             //relations

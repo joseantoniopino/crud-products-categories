@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\DataTableProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,11 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('products', function (){
-    $data = datatables()
-        ->eloquent(\App\Models\Product::query())
-        ->addColumn('btn', 'products.partials.actions')
-        ->rawColumns(['btn'])
-        ->toJson();
-    return $data;
-});
+Route::get('products', DataTableProductController::class);

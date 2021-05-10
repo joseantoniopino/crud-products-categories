@@ -2,77 +2,86 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveProductRequest;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Src\Application\Repository\Eloquent\ProductRepository;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return View
-     */
+    private Collection $categories;
+
+    public function __construct(protected ProductRepository $repository)
+    {
+        $this->categories = Category::pluck('name', 'id');
+    }
+
+
     public function index(): View
     {
         return view('products.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
+
+    public function create(): View
     {
-        //
+        return \view('products.create')->with([
+            'categories' => $this->categories,
+            'product' => new Product()
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
+
+    public function store(SaveProductRequest $request): RedirectResponse
     {
-        //
+
+        $fields = $request->validated();
+
+        $product = new Product($fields);
+        $product->image = $request->file('image')->store('/', 'products');
+        $this->repository->create($product->toArray());
+
+        return redirect()->route('products.show', $product->id)->with('status', 'Product created!');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param Product $product
-     * @return Response
-     */
-    public function show(Product $product)
+
+    public function show(Product $product): View
     {
-        //
+        return \view('products.show')->with('product', $product);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Product $product
-     * @return Response
-     */
-    public function edit(Product $product)
+
+    public function edit(Product $product): View
     {
-        //
+        return \view('products.edit')->with([
+            'product' => $product,
+            'categories' => $this->categories
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Product $product
-     * @return Response
-     */
-    public function update(Request $request, Product $product)
+
+    public function update(SaveProductRequest $request, Product $product): RedirectResponse
     {
-        //
+        $imagePath = public_path() . '/images/products/' . $product->image;
+        $product->fill($request->validated());
+
+        if ($request->hasFile('image')){
+            File::delete($imagePath);
+            $product->image = $request->file('image')->store('/', 'products');
+        }
+
+        $this->repository->update($product->id, $product->toArray());
+
+
+        return redirect()->route('products.show', $product->id)->with('status', 'Product updated!');
+
     }
 
 
@@ -86,13 +95,18 @@ class ProductController extends Controller
             'status' => 500
         ];
 
-        if (Product::destroy($id)){
+        if ($product = $this->repository->findById($id)){
+            $imagePath = public_path() . '/images/products/' . $product->image;
+            $product->delete();
+            File::delete($imagePath);
             $data = [
                 'success' => true,
                 'message' => "Product has been removed",
                 'status' => 200
             ];
         }
+
+
         return response()->json($data, $data['status']);
     }
 }

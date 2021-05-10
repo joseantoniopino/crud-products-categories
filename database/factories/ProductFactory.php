@@ -37,17 +37,14 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
-        $name = $this->faker->sentence;
-        $slug = Str::slug($name);
-
         return [
             'id' => Str::uuid(),
             'category_id' => $this->faker->randomElement($this->categories),
-            'name' => $name,
+            'name' => $this->faker->unique()->word,
             'description' => $this->faker->paragraph,
-            'slug' => $slug,
-            'image' => $this->faker->image('public/storage/products'),
+            'image' => Str::remove('public/images/products/', $this->faker->image('public/images/products')),
             'price' => $this->faker->randomFloat(2, 10, 9999.99),
+            'with_stock' => $this->faker->boolean
         ];
     }
 }

@@ -22,13 +22,10 @@ class CategoryFactory extends Factory
      */
     public function definition()
     {
-        $name = $this->faker->sentence;
-        $slug = Str::slug($name);
         return [
             'id' => Str::uuid(),
-            'name' => $name,
+            'name' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
-            'slug' => $slug,
         ];
     }
 }

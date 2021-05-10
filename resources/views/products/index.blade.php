@@ -7,26 +7,25 @@
 
 @section('content_header')
     <h1>Products</h1>
-    <table id="products" class="table table-responsive">
-        <thead>
-        <tr>
-            <th style="width: 20%;">Name</th>
-            <th style="width: 50%">Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>&nbsp;</th>
-        </tr>
-        </thead>
-    </table>
 @endsection
 
 @section('content')
-    <p>Products Index content</p>
+    <a href="{{route('products.create')}}" class="btn btn-primary float-right"><i class="fa fa-plus"></i> New</a>
+    <div class="box">
+        <table id="products" class="table table-responsive">
+            <thead>
+            <tr>
+                <th>Image</th>
+                <th style="width: 10%;">Name</th>
+                <th style="width: 50%">Description</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+        </table>
+        </div>
 @endsection
-
-{{--@section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
-@endsection--}}
 
 @section('js')
     <script>
@@ -35,8 +34,18 @@
                 'serverSide': true,
                 'ajax': "{{url('api/products')}}",
                 'columns': [
+                    {   data: 'image',
+                        render: function (data, type, row){
+                            return '<img class="img-bordered-sm img-thumbnail img-size-64" src="/images/products/' + data + '"/>'
+                        }
+                    },
                     {data: 'name'},
-                    {data: 'description'},
+                    {
+                        data: 'description',
+                        render: function (data, type, row){
+                            return $("<div/>").html(data).text();
+                        }
+                    },
                     {data: 'price'},
                     {
                         data: 'with_stock',
@@ -53,7 +62,6 @@
                 ]
             });
         });
-
 
         function callDeleteAlert(id) {
             Swal.fire({
